@@ -1,0 +1,106 @@
+<div style="margin: 10px 10px 10px 20px;">
+    <div class="layui-col-xs12">
+        <div id="hydrology_mix_main" style="width: 100%;height:280px;"></div>
+    </div>
+</div>
+<script src="/static/js/echarts.common.min.js"></script>
+<script>
+    var myChart = echarts.init(document.getElementById('hydrology_mix_main'));
+    init_hydrology_data();
+    function init_hydrology_data() {
+        myChart.showLoading();
+        $.post("/hydrology/hydrology_mix_line/", {'device_id': {{device_id}}}, function(data, status){
+            if ( status === 'success'  ){
+                refrush_mix_data(data);
+                myChart.hideLoading();
+            }
+        });
+    }
+
+    function refrush_mix_data(data) {
+        var colors = ['#5793f3', '#d14a61', '#675bba', '#5794f6', '#d14a62', '#676bba', '#d15a61'];
+        var option = {
+            color: colors,
+
+            tooltip: {
+                trigger: 'none',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            legend: {
+                data:['水位(m)', '土壤温度1(℃)', '土壤湿度1(%RH)', '土壤温度2(℃)', '土壤湿度2(%RH)', '土壤温度3(℃)', '土壤湿度3(%RH)']
+            },
+            grid: {
+                top: 70,
+                bottom: 50
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLine: {
+                        onZero: false,
+                        lineStyle: {
+                            color: colors[1]
+                        }
+                    },
+                    data: data.list_x
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name:'水位(m)',
+                    type:'line',
+                    smooth: true,
+                    data: data.water_level_list
+                },
+                {
+                    name:'土壤温度1(℃)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_1_list
+                },
+                {
+                    name:'土壤湿度1(%RH)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_2_list
+                },
+                {
+                    name:'土壤温度2(℃)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_3_list
+                },
+                {
+                    name:'土壤湿度2(%RH)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_4_list
+                },
+                {
+                    name:'土壤温度3(℃)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_5_list
+                },
+                {
+                    name:'土壤湿度3(%RH)',
+                    type:'line',
+                    smooth: true,
+                    data: data.soil_6_list
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+    }
+</script>

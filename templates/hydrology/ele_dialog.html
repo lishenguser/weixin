@@ -1,0 +1,96 @@
+{% load staticfiles %}
+<div style="margin: 10px 10px 10px 20px;">
+    <span style="margin-right: 10px; font-size: 20px" id="device_name"></span>
+    <span id="region"></span>
+    <input type="text" class="layui-input layui-layout-right" id="date_dialog" placeholder="选择日期"
+           style="width: 180px;margin-top: 15px;margin-right: 20px;">
+</div>
+<div class="pre-scrollable" style="margin: 10px;">
+    <table id='power_supply_detail' class="layui-table"></table>
+</div>
+<script>
+    var table;
+    var layer;
+    var load_index;
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+          laydate.render({
+            elem: '#date_dialog'
+            ,range: true
+              ,done: function(value, date, endDate) {
+                date_range(form_date(date.year, date.month, date.date), form_date(endDate.year, endDate.month, endDate.date));
+              }
+          });
+    });
+
+    layui.use('table', function(){
+        table = layui.table;
+        device_title();
+        init_table();
+    });
+
+    function date_range(start_date, end_date) {
+        load_index = layer.load(0, {shade: [0.1,'#000'], time: 10000});
+        table.render({
+          elem: '#power_supply_detail'
+          ,height: '340px'
+          ,url: '/hydrology/power_supply_detail_list/'
+          ,id: 'power_supply_detail'
+          ,size: 'sm'
+          ,even: true
+          ,page: true
+            ,where: {device_id:'{{device_id}}', date_form: start_date, date_to: end_date}
+          ,limits: [15,30,60,100,200]
+          ,limit: 15
+          ,cols:  [[
+            {field: 'create_time', title: '时间', width: 150, sort: true, fixed: 'left'}
+            ,{field: 'voltage_1', title: '三相电压ab(V)', width: 110}
+            ,{field: 'ele_1', title: '三相电流ab(V)', width: 130}
+            ,{field: 'voltage_2', title: '三相电压bc(V)', width: 110}
+            ,{field: 'ele_2', title: '三相电流bc(A)', width: 130}
+            ,{field: 'voltage_3', title: '三相电压ac(A)', width: 110}
+            ,{field: 'ele_3', title: '三相电流ac(A)', width: 130}
+          ]]
+          ,done: function(res, curr, count){
+                layer.close(load_index);
+            }
+        });
+    }
+
+    function init_table() {
+        load_index = layer.load(0, {shade: [0.1,'#000'], time: 10000});
+        table.render({
+          elem: '#power_supply_detail'
+          ,height: '340px'
+          ,url: '/hydrology/power_supply_detail_list/'
+          ,id: 'power_supply_detail'
+          ,size: 'sm'
+          ,even: true
+          ,page: true
+            ,where: {device_id:'{{device_id}}'}
+          ,limits: [15,30,60,100,200]
+          ,limit: 15
+          ,cols:  [[
+            {field: 'create_time', title: '时间', width: 150, sort: true, fixed: 'left'}
+            ,{field: 'voltage_1', title: '三相电压ab(V)', width: 110}
+            ,{field: 'ele_1', title: '三相电流ab(V)', width: 130}
+            ,{field: 'voltage_2', title: '三相电压bc(V)', width: 110}
+            ,{field: 'ele_2', title: '三相电流bc(A)', width: 130}
+            ,{field: 'voltage_3', title: '三相电压ac(A)', width: 110}
+            ,{field: 'ele_3', title: '三相电流ac(A)', width: 130}
+          ]]
+          ,done: function(res, curr, count){
+                layer.close(load_index);
+            }
+        });
+    }
+
+    function device_title() {
+        $.get("/manager/device_title/", {device_id: '{{device_id}}'}, function(data, status){
+            if ( status === 'success'  ){
+                $('#region').text('区域：' + data.region);
+                $('#device_name').text('水井名称：' + data.id);
+            }
+        });
+    }
+</script>

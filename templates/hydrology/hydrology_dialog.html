@@ -1,0 +1,56 @@
+{% load staticfiles %}
+<div style="margin: 10px 10px 10px 20px;">
+    <span style="margin-right: 10px; font-size: 20px" id="device_name"></span>
+    <span id="region"></span>
+</div>
+<div class="pre-scrollable" style="margin: 10px;">
+    <table id='table_hydrology_detail' class="layui-table"></table>
+</div>
+<script>
+    var table;
+    var layer;
+    var load_index;
+    layui.use('table', function(){
+        table = layui.table;
+        device_title();
+        init_table();
+    });
+
+    function init_table() {
+        load_index = layer.load(0, {shade: [0.1,'#000'], time: 10000});
+        table.render({
+          elem: '#table_hydrology_detail'
+          ,height: '340px'
+          ,url: '/hydrology/hydrology_detail_list/'
+          ,id: 'table_hydrology_detail'
+          ,size: 'sm'
+          ,even: true
+          ,page: true
+            ,where: {device_id:'{{device_id}}'}
+          ,limits: [15,30,60,100,200]
+          ,limit: 15
+          ,cols:  [[
+            {field: 'create_time', title: '时间', width: 140}
+            ,{field: 'water_level', title: '水位(m)', width: 70}
+            ,{field: 'soil_1', title: '土壤温度1(°C)', width: 110}
+            ,{field: 'soil_2', title: '土壤湿度1(%RH)', width: 120}
+            ,{field: 'soil_3', title: '土壤温度2(°C)', width: 110}
+            ,{field: 'soil_4', title: '土壤湿度2(%RH)', width: 130}
+            ,{field: 'soil_5', title: '土壤温度3(°C)', width: 110}
+            ,{field: 'soil_6', title: '土壤湿度3(%RH)', width: 130}
+          ]]
+          ,done: function(res, curr, count){
+                layer.close(load_index);
+            }
+        });
+    }
+
+    function device_title() {
+        $.get("/manager/device_title/", {device_id: '{{device_id}}'}, function(data, status){
+            if ( status === 'success'  ){
+                $('#region').text('区域：' + data.region);
+                $('#device_name').text('水井名称：' + data.id);
+            }
+        });
+    }
+</script>

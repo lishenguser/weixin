@@ -1,0 +1,60 @@
+
+<div style="margin: 10px 10px 10px 20px;">
+    <div class="layui-col-xs12">
+        <div id="main" style="width: 100%;height:280px;"></div>
+    </div>
+</div>
+<script src="/static/js/echarts.common.min.js"></script>
+<script>
+    var myChart = echarts.init(document.getElementById('main'));
+    get_data();
+    function get_data() {
+        myChart.showLoading();
+        $.post("/hydrology/rainfall_detail_list/", {'region_id': {{region_id}}}, function(data, status){
+            if ( status === 'success'  ){
+                refrush_data(data);
+                myChart.hideLoading();
+            }
+        });
+    }
+
+    function refrush_data(data) {
+        var option = {
+            // Make gradient line here
+            visualMap: [{
+                show: false,
+                type: 'continuous',
+                seriesIndex: 0,
+                min: 0,
+                max: 400
+            }],
+            title: [{
+                left: 'center',
+                text: '当年雨量分布',
+                subtext: data.year
+            }],
+            toolbox: {
+                show: true,
+                feature: {
+                    dataView: {readOnly: false},
+                    magicType: {type: ['line', 'bar']},
+                    restore: {},
+                    saveAsImage: {}
+                }
+            },
+            xAxis: [{
+                data: data.list_x
+            }],
+            yAxis: [{
+                splitLine: {show: false}
+            }],
+            series: [{
+                name:'雨量(mm)',
+                type: 'line',
+                showSymbol: false,
+                data: data.list_rain
+            }]
+        };
+        myChart.setOption(option);
+    }
+</script>

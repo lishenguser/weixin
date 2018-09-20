@@ -1,0 +1,332 @@
+{% extends "manager/base.html" %}
+{% load staticfiles %}
+
+{% block nav %}
+    <ul class="layui-nav mynav" pc="">
+      <li class="layui-nav-item">
+        <a href="/manager/map/">地图展示</a>
+      </li>
+      <li class="layui-nav-item">
+        <a href="/manager/device_page/">水井信息</a>
+      </li>
+      <li class="layui-nav-item" pc="">
+        <a href="/manager/villager_page/">用户信息</a>
+      </li>
+      <li class="layui-nav-item layui-this" pc="">
+        <a href="/hydrology/hydrology_page/">水文信息</a>
+      </li>
+        <li class="layui-nav-item" pc="">
+        <a href="/water/water_fee_page/">水费征收</a>
+      </li>
+        <li class="layui-nav-item" pc="">
+        <a href="/water/water_transaction_page/">水权交易</a>
+      </li>
+        <li class="layui-nav-item" pc="">
+        <a href="/water/operation_maintenance_page/">运行维护</a>
+      </li>
+        <li class="layui-nav-item" pc="">
+        <a href="/statistics/statistics/">统计报表</a>
+      </li>
+</ul>
+{% endblock %}
+
+{% block main %}
+    <style>
+    th .layui-table-cell {
+        height: auto;
+        line-height: 28px;
+        padding: 0 15px;
+        position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        box-sizing: border-box;
+      }
+    .layui-table-view .layui-table[lay-size=sm] th .layui-table-cell{
+        height: auto;
+    }
+    </style>
+    <div class="layui-main">
+    <style>
+    .layui-input{
+        height: 25px;
+    }
+    </style>
+    <div class="layui-col-xs2" style="margin-top: 50px">
+        <input type="text" class="layui-input layui-hide" id="date_select" placeholder="选择日期" style="width: 180px;">
+        <div style="display: inline-block; width: 180px; height: 60%; border: 1px solid #ddd;overflow:
+         auto; margin-top: 5px">
+          <ul id="region_select" style="width: 180px;"></ul>
+        </div>
+    </div>
+    <div class="layui-col-xs10">
+        <div class="layui-tab">
+          <ul class="layui-tab-title">
+                <li class="layui-this" onclick="change('#hydrology')">墒情信息</li>
+                <li onclick="change('#rainfall')">雨量信息</li>
+                <li onclick="change('#power_supply')">供电信息</li>
+          </ul>
+          <div class="layui-tab-content">
+              <div class="layui-tab-item layui-show">
+                    <table class="layui-table" lay-data="{height:'auto', url:'/hydrology/hydrology_list/', page:true, size:'sm',even: true, id:'table_1'}" lay-filter="table_1_filter">
+                      <thead>
+                        <tr>
+                            <th lay-data="{field:'region', width:'9%', sort: true, event: 'ctrl_detail',style:'cursor: pointer;'}">区域</th>
+                            <th lay-data="{field:'device_number', width:'9%', event: 'ctrl_detail', style:'cursor:pointer'}">水井名</th>
+                            <th lay-data="{field:'water_level', width:'9%', sort: true, event: 'ctrl_detail',style:'cursor: pointer;'}">水位(m)</th>
+                            <th lay-data="{field:'soil_1', width:'12%', templet: '#soil_1'}">土壤温度1(°C)</th>
+                            <th lay-data="{field:'soil_2', width:'12%', templet: '#soil_2'}">土壤湿度1(%RH)</th>
+                            <th lay-data="{field:'soil_3', width:'12%', templet: '#soil_3'}">土壤温度2(°C)</th>
+                            <th lay-data="{field:'soil_4', width:'12%', templet: '#soil_4'}">土壤湿度2(%RH)</th>
+                            <th lay-data="{field:'soil_5', width:'12.2%', templet: '#soil_5'}">土壤温度3(°C)</th>
+                            <th lay-data="{field:'soil_6', width:'13%', templet: '#soil_6'}">土壤湿度3(%RH)</th>
+                        </tr>
+                      </thead>
+                    </table>
+            </div>
+              <div class="layui-tab-item">
+                     <table class="layui-table" lay-data="{height:'auto', url:'/hydrology/rainfall_list/', page:true, even: true,size:'sm',
+                    id:'table_2'}" lay-filter="table_2_filter">
+                      <thead>
+                        <tr>
+                          <th lay-data="{field:'region', width:'11.5%', event: 'ctrl_detail', style:'cursor: pointer;'}"></th>
+                          <th lay-data="{field:'rainfall_history', width:'20%', event: 'ctrl_detail', style:'cursor: pointer;'}">历史降水量(mm)</th>
+                          <th lay-data="{field:'rainfall_total', width:'23%', sort: true}">总降水量(mm)</th>
+                          <th lay-data="{field:'rainfall_today', width:'23%', sort:true}">今日降水量(mm)</th>
+                          <th lay-data="{field:'rainfall_yesterday', width:'22.5%', sort:true}">昨日降水量(mm)</th>
+                        </tr>
+                      </thead>
+                    </table>
+            </div>
+              <div class="layui-tab-item">
+                     <table class="layui-table" lay-data="{height:'auto', url:'/hydrology/power_supply_list/', page:true, even: true,size:'sm',
+                    id:'table_3'}" lay-filter="table_3_filter">
+                      <thead>
+                        <tr>
+                            <th lay-data="{field:'region', width:'12%', sort: true, event: 'ctrl_detail',style:'cursor: pointer;'}">区域</th>
+                            <th lay-data="{field:'device_number', width:'12%', sort: true, event: 'ctrl_detail',style:'cursor: pointer;', fixed: 'left'}">水井名称</th>
+                            <th lay-data="{field:'voltage_1', width:'12%', sort: true}">三相电压ab(V)</th>
+                            <th lay-data="{field:'ele_1', width:'12%', sort: true}">三相电流ab(A)</th>
+                            <th lay-data="{field:'voltage_2', width:'13%', sort: true}">三相电压bc(V)</th>
+                            <th lay-data="{field:'ele_2', width:'13%', sort: true}">三相电流bc(A)</th>
+                          <th lay-data="{field:'voltage_3', width:'13%', sort: true, sort:true}">三相电压ac(V)</th>
+                          <th lay-data="{field:'ele_3', width:'13.3%', sort:true}">三相电流ac(A)</th>
+                        </tr>
+                      </thead>
+                    </table>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    {% verbatim %}
+    <script type="text/html" id="soil_1">
+      {{#  if(d.soil_1 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_1  }}
+      {{#  } }}
+    </script>
+    <script type="text/html" id="soil_2">
+      {{#  if(d.soil_2 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_2  }}
+      {{#  } }}
+    </script>
+    <script type="text/html" id="soil_3">
+      {{#  if(d.soil_3 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_3  }}
+      {{#  } }}
+    </script>
+    <script type="text/html" id="soil_4">
+      {{#  if(d.soil_4 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_4  }}
+      {{#  } }}
+    </script>
+    <script type="text/html" id="soil_5">
+      {{#  if(d.soil_5 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_5  }}
+      {{#  } }}
+    </script>
+    <script type="text/html" id="soil_6">
+      {{#  if(d.soil_6 == '6533.6'){ }}
+        0
+      {{#  } else { }}
+        {{ d.soil_6  }}
+      {{#  } }}
+    </script>
+    {% endverbatim %}
+    </div>
+{% endblock %}
+
+{% block extended %}
+    <script>
+        var change_status = '#hydrology';
+        var region_id = '{{ user.userprofile.region.id }}';
+        var timeout;
+        var table;
+        var layer;
+        layui.use('layer', function(){layer = layui.layer;});
+        layui.use('table', function(){
+            table = layui.table;
+            table.on('tool(table_1_filter)', function(obj){
+                var cur_data = obj.data;
+                if(obj.event === 'ctrl_detail'){
+                    $.post("/hydrology/hydrology_detail_page/", {'device_id': cur_data.id}, function(data, status){
+                        if ( status === 'success'  ){
+                            layer.open({
+                                type: 1,
+                                title: '水文详细信息'
+                                ,area: ['970px', '460px']
+                                ,maxmin: true
+                                ,yes: function(){
+                                  layer.closeAll();
+                                },
+                                content: data
+                              });
+                        }
+                      });
+                }
+          });
+            table.on('tool(table_2_filter)', function(obj){
+                var cur_data = obj.data;
+                if(obj.event === 'ctrl_detail'){
+                    $.post("/hydrology/rainfall_detail_page/", {'region_id': cur_data.region_id}, function(data, status){
+                        if ( status === 'success'  ){
+                            if ( status === 'success'  ){
+                                layer.open({
+                                    type: 1,
+                                    title: cur_data.region
+                                    ,area: ['900px', '340px']
+                                    ,yes: function(){
+                                      layer.closeAll();
+                                    },
+                                    content: data
+                                  });
+                            }
+                        }
+                    });
+                }
+            });
+            table.on('tool(table_3_filter)', function(obj){
+                var cur_data = obj.data;
+                if(obj.event === 'ctrl_detail'){
+                    $.post("/hydrology/power_supply_detail_page/", {'device_id': cur_data.id},
+                    function(data, status){
+                        if ( status === 'success'  ){
+                            layer.open({
+                                type: 1,
+                                title: '供电详细信息'
+                                ,area: ['900px', '460px']
+                                ,maxmin: true
+                                ,yes: function(){
+                                  layer.closeAll();
+                                },
+                                content: data
+                              });
+                        }
+                      });
+                }
+            });
+        });
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#date_select'
+                , range: true
+                ,done: function(value, date, endDate) {
+                history_get_rain_data(form_date(date.year, date.month, date.date), form_date(endDate.year, endDate.month, endDate.date));
+              }
+            });
+        });
+
+        $.post("/user/v1/regions_tree/", {}, function(data, status) {
+            layui.use(['tree', 'layer'], function() {
+                var layer = layui.layer;
+                var $ = layui.jquery;
+
+                layui.tree({
+                    elem: '#region_select'
+                    , click: function (item) {
+                        region_id = item.id;
+
+                        if (change_status === '#power_supply'){
+                            get_table3_data(region_id);
+                        }else if ( change_status === '#rainfall' ){
+                            get_table2_data(region_id);
+                        }else{
+                            get_table1_data(region_id);
+                        }
+                    }
+                    , nodes: data.query_response
+                });
+            });
+        });
+
+        function get_table1_data(region_id){
+            table.reload(
+                'table_1',
+                {url: '/hydrology/hydrology_list/',
+                where: {region_id:region_id}}
+            );
+
+            window.clearInterval(timeout);
+            timeout = window.setInterval("get_table1_data('" + region_id + "')", 60000);
+        }
+        timeout = window.setInterval("get_table1_data(region_id)", 60000);
+
+        function get_table2_data(region_id){
+            table.reload(
+                'table_2',
+                {url: '/hydrology/rainfall_list/',
+                where: {region_id:region_id}}
+            );
+
+            window.clearInterval(timeout);
+            timeout = window.setInterval("get_table2_data('" + region_id + "')", 60000);
+        }
+
+        function history_get_rain_data(start_date, end_date) {
+            table.reload(
+                'table_2',
+                {url: '/hydrology/rainfall_list/', method: 'post',
+                where: {region_id:region_id, date_form: start_date, date_to: end_date}}
+            );
+
+{#            window.clearInterval(timeout);#}
+{#            timeout = window.setInterval("history_get_rain_data(" + start_date + ',' + end_date + ")", 60000);#}
+        }
+
+        function get_table3_data(region_id){
+            table.reload(
+                'table_3',
+                {url: '/hydrology/power_supply_list/',
+                where: {region_id:region_id}}
+            );
+
+            window.clearInterval(timeout);
+            timeout = window.setInterval("get_table3_data('" + region_id + "')", 60000);
+        }
+
+        function change(div) {
+            change_status = div;
+            if (change_status === '#rainfall'){
+                $('#date_select').removeClass('layui-hide');
+                get_table2_data(region_id);
+            }else if (change_status === '#power_supply'){
+                $('#date_select').addClass('layui-hide');
+                get_table3_data(region_id);
+            }else{
+                $('#date_select').addClass('layui-hide');
+               get_table1_data(region_id);
+            }
+        }
+    </script>
+{% endblock %}

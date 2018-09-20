@@ -1,0 +1,5 @@
+smartwell/.idea/
+*.pyc
+smartwell/manager/migrations/
+smartwell/device_manager/migrations/
+smartwell/user_manager/migrations/
